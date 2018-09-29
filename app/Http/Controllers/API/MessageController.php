@@ -9,6 +9,7 @@ use App\Traits\ErrorResponseTrait;
 use App\Exceptions\FailedToSendGuzzleRequestException;
 use App\Message;
 use App\Http\Resources\MessageResource;
+use Carbon\Carbon;
 
 class MessageController extends Controller
 {
@@ -52,6 +53,8 @@ class MessageController extends Controller
 
                     // the raw message of each entry
                     $raw_message = $this->extractEntryFromResponse($e);
+                    $message_hour = $this->getMessageDateOrHour($e, 'hour');
+                    $message_date = $this->getMessageDateOrHour($e, 'date');
 
                     try {
                         
@@ -65,7 +68,7 @@ class MessageController extends Controller
 
                             // extracting the location, then creating a message from it
                             $matched_location = $decoded_matched_locations['results'][0];
-                            $message = $this->createMessageInstance($raw_message, $matched_location);
+                            $message = $this->createMessageInstance($raw_message, $matched_location, $message_hour, $message_date);
                             
                             // pushong into the collection
                             $feeds_collection->push($message);
@@ -164,9 +167,33 @@ class MessageController extends Controller
     }
 
     /**
+     *  this method returns the hour of the message, to be filtered by the client
+     *  $mode is used to use this method in 2 modes (to get hour / to get Y-m-d date)
+     */
+    private function getMessageDateOrHour($entry, $mode) 
+    {
+        if($entry['title']['$t']) {
+
+            try {
+
+                if(strtolower($mode) == 'hour')
+                    return Carbon::createFromFormat('m-d-y H:i', $entry['title']['$t'])->hour;
+                else 
+                    return Carbon::createFromFormat('m-d-y H:i', $entry['title']['$t'])->format('Y-m-d');
+
+            } catch (\Exception $e) {
+                return null;
+            }
+
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * this method is used to create a message object, later this object will be push into a collection
      */
-    private function createMessageInstance($raw_message, $matched_location)
+    private function createMessageInstance($raw_message, $matched_location, $message_hour, $message_date)
     {
         $location_name = $matched_location['address_components'][0]['short_name'];
         $lat = $matched_location['geometry']['location']['lat'];
@@ -178,6 +205,8 @@ class MessageController extends Controller
             'location_name' => $location_name,
             'lat' => $lat,
             'lng' => $lng,
+            'message_hour' => $message_hour,
+            'message_date' => $message_date,
             'sentiment' => $sentiment
         ]);
     }

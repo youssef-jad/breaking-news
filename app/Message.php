@@ -14,6 +14,8 @@ class Message extends Model
         'location_name',
         'lat',
         'lng',
-        'sentiment'
+        'sentiment',
+        'message_hour',
+        'message_date'
     ];
 }

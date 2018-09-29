@@ -19,6 +19,8 @@ class MessageResource extends JsonResource
             'location_name' => $this->location_name,
             'lat' => $this->lat,
             'lng' => $this->lng,
+            'message_hour' => $this->message_hour,
+            'message_date' => $this->message_date,
             'sentiment' => $this->sentiment,
         ];
     }

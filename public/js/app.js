@@ -48602,6 +48602,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -48612,7 +48620,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         SemipolarSpinner: __WEBPACK_IMPORTED_MODULE_1_epic_spinners__["a" /* SemipolarSpinner */]
     },
     computed: {
-        google: __WEBPACK_IMPORTED_MODULE_0_vue2_google_maps__["gmapApi"]
+        google: __WEBPACK_IMPORTED_MODULE_0_vue2_google_maps__["gmapApi"],
+        filteredMarkers: function filteredMarkers() {
+            var _this = this;
+
+            return this.markers.filter(function (m) {
+                return m.message_hour >= _this.start_time;
+            });
+        }
     },
     methods: {
         displayFeedMessage: function displayFeedMessage(feed) {
@@ -48620,7 +48635,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             this.$swal(feed.body);
         },
         fetchFeedsFromServer: function fetchFeedsFromServer() {
-            var _this = this;
+            var _this2 = this;
 
             this.isLoading = true;
             this.requestSent = true;
@@ -48629,21 +48644,19 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             axios.get('/api/fetch-feed').then(function (response) {
                 // passing markers to the map
                 if (response.status == 200) {
-                    _this.markers = response.data.data;
+                    _this2.markers = response.data.data;
 
                     if (response.data.data.length == 0) {
-                        _this.$swal('Succesfull request, but there is no feeds');
+                        _this2.$swal('Succesfull request, but there is no feeds');
                     }
                 } else {
-                    _this.requestSent = false;
+                    _this2.requestSent = false;
                 }
-                _this.isLoading = false;
+                _this2.isLoading = false;
             }).catch(function (error) {
                 // re-enabling the button again
-                _this.requestSent = false;
-                _this.$swal('Error while fetching data from server', {
-                    type: 'error'
-                });
+                _this2.requestSent = false;
+                _this2.$swal('Error while fetching data from server');
             });
         }
     },
@@ -48651,7 +48664,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         return {
             isLoading: true,
             requestSent: false,
-            markers: []
+            markers: [],
+            start_time: 0
         };
     }
 });
@@ -54490,6 +54504,37 @@ var render = function() {
         "div",
         { staticClass: "animated fadeIn" },
         [
+          _c("div", [
+            _c("label", [
+              _vm._v(
+                "Filter by hours (will display feeds the happend after that hour - 24 Hour system)"
+              )
+            ]),
+            _vm._v(" "),
+            _c("input", {
+              directives: [
+                {
+                  name: "model",
+                  rawName: "v-model",
+                  value: _vm.start_time,
+                  expression: "start_time"
+                }
+              ],
+              attrs: { type: "number" },
+              domProps: { value: _vm.start_time },
+              on: {
+                input: function($event) {
+                  if ($event.target.composing) {
+                    return
+                  }
+                  _vm.start_time = $event.target.value
+                }
+              }
+            })
+          ]),
+          _vm._v(" "),
+          _c("br"),
+          _vm._v(" "),
           _c(
             "GmapMap",
             {
@@ -54500,7 +54545,7 @@ var render = function() {
                 "map-type-id": "terrain"
               }
             },
-            _vm._l(_vm.markers, function(m, index) {
+            _vm._l(_vm.filteredMarkers, function(m, index) {
               return _c("GmapMarker", {
                 key: index,
                 attrs: {

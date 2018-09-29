@@ -2,6 +2,14 @@
 
     <!-- the map, will be visible after loading is finished -->
     <div v-if="!isLoading && requestSent" class="animated fadeIn">
+
+        <div>
+            <label>Filter by hours (will display feeds the happend after that hour - 24 Hour system)</label>
+            <input v-model="start_time" type="number">
+        </div>
+
+        <br>
+
         <GmapMap
         :center="{lat:30, lng:30}"
         :zoom="3"
@@ -10,7 +18,7 @@
         >
             <GmapMarker
                 :key="index"
-                v-for="(m, index) in markers"
+                v-for="(m, index) in filteredMarkers"
                 :position="google && new google.maps.LatLng(m.lat, m.lng)"
                 :clickable="true"
                 :draggable="false"
@@ -47,7 +55,12 @@ export default {
         SemipolarSpinner
     },
     computed : {
-        google: gmapApi
+        google: gmapApi,
+        filteredMarkers() {
+            return this.markers.filter((m) => {
+                return m.message_hour >= this.start_time
+            })
+        }
     },
     methods: {
         displayFeedMessage(feed) {
@@ -77,9 +90,7 @@ export default {
             .catch(error => {
                 // re-enabling the button again
                 this.requestSent = false
-                this.$swal('Error while fetching data from server', {
-                    type: 'error'
-                });
+                this.$swal('Error while fetching data from server');
             })
         }
     },
@@ -88,6 +99,7 @@ export default {
             isLoading: true,
             requestSent: false,
             markers: [],
+            start_time: 0
         }
     }
 }
