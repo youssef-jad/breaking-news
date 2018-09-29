@@ -4,7 +4,7 @@
     <div v-if="!isLoading && requestSent" class="animated fadeIn">
         <GmapMap
         :center="{lat:30, lng:30}"
-        :zoom="5"
+        :zoom="3"
         map-type-id="terrain"
         style="width: 1000px; height: 600px"
         >
@@ -62,7 +62,16 @@ export default {
             axios.get('/api/fetch-feed')
             .then(response => {
                 // passing markers to the map
-                this.markers = response.data.data
+                if(response.status == 200) {
+                    this.markers = response.data.data
+
+                    if(response.data.data.length == 0) {
+                        this.$swal('Succesfull request, but there is no feeds');
+                    }
+
+                } else {
+                    this.requestSent = false
+                }
                 this.isLoading = false
             })
             .catch(error => {
