@@ -18,5 +18,12 @@
         "lodash": "^4.17.5",
         "popper.js": "^1.12",
         "vue": "^2.5.7"
+    },
+    "dependencies": {
+        "animate.css": "^3.7.0",
+        "epic-spinners": "^1.0.3",
+        "vue-awesome-notifications": "^2.2.9",
+        "vue-sweetalert2": "^1.5.3",
+        "vue2-google-maps": "^0.10.2"
     }
 }
